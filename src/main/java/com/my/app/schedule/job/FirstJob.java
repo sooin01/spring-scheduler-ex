@@ -11,6 +11,14 @@ public class FirstJob implements Job {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		Trigger trigger = context.getTrigger();
 		System.out.println(trigger.getKey());
+
+		try {
+			System.out.println("waiting.");
+			Thread.sleep(5000);
+			System.out.println("end.");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
