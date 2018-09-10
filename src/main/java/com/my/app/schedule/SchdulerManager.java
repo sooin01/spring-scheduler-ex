@@ -35,6 +35,8 @@ public class SchdulerManager {
 
 		boolean deleteJob = scheduler.deleteJob(jobKey);
 		System.out.println("deleteJob: " + deleteJob);
+		boolean unscheduleJob = scheduler.unscheduleJob(triggerKey);
+		System.out.println("unscheduleJob: " + unscheduleJob);
 
 		scheduler.shutdown();
 	}
