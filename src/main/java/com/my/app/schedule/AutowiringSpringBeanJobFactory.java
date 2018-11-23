@@ -1,6 +1,7 @@
 package com.my.app.schedule;
 
 import org.quartz.spi.TriggerFiredBundle;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -8,17 +9,18 @@ import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
 public class AutowiringSpringBeanJobFactory extends SpringBeanJobFactory implements ApplicationContextAware {
 
-	private transient AutowireCapableBeanFactory beanFactory;
+	private ApplicationContext applicationContext;
 
 	@Override
-	public void setApplicationContext(final ApplicationContext context) {
-		this.beanFactory = context.getAutowireCapableBeanFactory();
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 
 	@Override
-	protected Object createJobInstance(final TriggerFiredBundle bundle) throws Exception {
-		final Object job = super.createJobInstance(bundle);
-		this.beanFactory.autowireBean(job);
+	protected Object createJobInstance(TriggerFiredBundle bundle) throws Exception {
+		Object job = super.createJobInstance(bundle);
+		AutowireCapableBeanFactory beanFactory = applicationContext.getAutowireCapableBeanFactory();
+		beanFactory.autowireBean(job);
 		return job;
 	}
 
