@@ -30,7 +30,7 @@
 			</list>
 		</property> -->
 		<property name="waitForJobsToCompleteOnShutdown" value="true" />
-		<!-- <property name="configLocation" value="classpath:quartz/quartz.properties" /> -->
+		<property name="configLocation" value="classpath:quartz/quartz.properties" />
 	</bean>
 
 </beans>
