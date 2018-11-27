@@ -2,6 +2,7 @@ package com.my.app.schedule.service;
 
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.quartz.CronScheduleBuilder;
@@ -16,8 +17,8 @@ import org.quartz.impl.StdScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -26,16 +27,16 @@ import org.springframework.stereotype.Service;
 import com.my.app.simple.job.SimpleJob;
 
 @Service
-public class ScheduleService implements ApplicationListener<ContextRefreshedEvent> {
+public class ScheduleService {
 
-	private final static Logger LOD = LoggerFactory.getLogger(ScheduleService.class);
+	private final static Logger LOG = LoggerFactory.getLogger(ScheduleService.class);
 
 	@Autowired
 	private SchedulerFactoryBean schedulerFactoryBean;
 
 	private StdScheduler scheduler;
 
-	@Override
+	@EventListener
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		this.scheduler = (StdScheduler) schedulerFactoryBean.getObject();
 
@@ -68,23 +69,19 @@ public class ScheduleService implements ApplicationListener<ContextRefreshedEven
 
 	private void init2() throws SchedulerException {
 		JobKey jobKey = new JobKey("simpleJob");
-//		scheduler.deleteJob(jobKey);
+		List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
 
-		TriggerKey triggerKey = new TriggerKey("simpleJob");
-		JobDetail jobDetail = scheduler.getJobDetail(jobKey);
-		if (jobDetail == null) {
-			jobDetail = JobBuilder.newJob(SimpleJob.class).withIdentity(jobKey).build();
-		}
-		Trigger trigger = scheduler.getTrigger(triggerKey);
-		if (trigger == null) {
-			trigger = TriggerBuilder.newTrigger().forJob(jobDetail).withIdentity(triggerKey)
+		if (triggers.isEmpty()) {
+			TriggerKey triggerKey = new TriggerKey("simpleJob");
+			JobDetail jobDetail = JobBuilder.newJob(SimpleJob.class).withIdentity(jobKey).build();
+			Trigger trigger = TriggerBuilder.newTrigger().forJob(jobDetail).withIdentity(triggerKey)
 					.withSchedule(CronScheduleBuilder.cronSchedule("0/3 * * * * ?")).build();
 			scheduler.scheduleJob(jobDetail, trigger);
 		}
 	}
 
 	public void process() {
-		LOD.info("Service process.");
+		LOG.info("Service process.");
 	}
 
 }
